@@ -22,4 +22,4 @@ Registruotas naudotojas gali:
   
 <b>Pasirinktų technologijų aprašymas ir sistemos architektūra</b></br>
 
-Sistemos sudaryta iš kliento pusės ir serverio pusės. Kliento pusė sukurta naudojant React.js. Serverio pusė sukurta naudojant C#. Naudojama duomenų bazė MySQL.
+Sistemos sudaryta iš kliento pusės ir serverio pusės. Kliento pusė sukurta naudojant React.js. Serverio pusė sukurta naudojant C#. Naudojama duomenų bazė PostgreSQL.
