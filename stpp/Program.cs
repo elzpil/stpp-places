@@ -1,4 +1,5 @@
 using FluentValidation;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using O9d.AspNet.FluentValidation;
 using stpp.Data;
@@ -7,13 +8,48 @@ using System.Diagnostics.Metrics;
 using static stpp.Data.Entities.City;
 using static stpp.Data.Entities.Country;
 using static stpp.Data.Entities.Place;
+using Microsoft.AspNetCore.Identity;
+using stpp.Auth.Model;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Http;
+using System.Net.Http;
+using stpp.Auth;
+using Microsoft.AspNetCore.Authorization;
+
+JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<ForumDbContext>();
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+builder.Services.AddTransient<JwtTokenService>();
+builder.Services.AddScoped<AuthDbSeeder>();
+
+builder.Services.AddIdentity<ForumRestUser, IdentityRole>()
+    .AddEntityFrameworkStores<ForumDbContext>()
+    .AddDefaultTokenProviders();
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(options =>
+{ 
+    options.TokenValidationParameters.ValidAudience = builder.Configuration["Jwt:ValidAudience"];
+    options.TokenValidationParameters.ValidIssuer = builder.Configuration["Jwt:ValidIssuer"];
+    options.TokenValidationParameters.IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Secret"]));
+});
+builder.Services.AddAuthorization();
+
 var app = builder.Build();
 
+#region Endpoints
 //country,city,place
 var countriesGroup = app.MapGroup("/api").WithValidationFilter();
 
@@ -32,29 +68,34 @@ countriesGroup.MapGet("countries/{countryId}", async (int countryId, ForumDbCont
     return Results.Ok(new CountryDto(country.Id, country.Name, country.Description));
 });
 
-countriesGroup.MapPost("countries", async ([Validate] CreateCountryDto createCountryDto,  ForumDbContext dbContext) =>
+countriesGroup.MapPost("countries", [Authorize(Roles =ForumRoles.ForumUser)] async ([Validate] CreateCountryDto createCountryDto, HttpContext httpContext, ForumDbContext dbContext) =>
 {
     var country = new Country()
     {
         Name = createCountryDto.Name,
-        Description = createCountryDto.Description
+        Description = createCountryDto.Description,
+        UserId = httpContext.User.FindFirstValue(JwtRegisteredClaimNames.Sub)
     };
     dbContext.Countries.Add(country);
     await dbContext.SaveChangesAsync();
     return Results.Created("api/countries/{country.Id}", new CountryDto(country.Id, country.Name, country.Description));
 });
 
-countriesGroup.MapPut("countries/{countryId}", async (int countryId, [Validate]UpdateCountryDto dto, ForumDbContext dbContext) =>
+countriesGroup.MapPut("countries/{countryId}", [Authorize(Roles = ForumRoles.ForumUser)] async (int countryId, [Validate]UpdateCountryDto dto, HttpContext httpContext, ForumDbContext dbContext) =>
 {
     var country = await dbContext.Countries.FirstOrDefaultAsync(c => c.Id == countryId);
     if (country == null)
         return Results.NotFound();
+
+    if(!httpContext.User.IsInRole(ForumRoles.Admin) || httpContext.User.FindFirstValue(JwtRegisteredClaimNames.Sub)!= country.UserId)
+    {
+        return Results.Forbid();
+    }
+
     country.Description = dto.Description;
     dbContext.Update(country);
     await dbContext.SaveChangesAsync();
     return Results.Ok(new CountryDto(country.Id, country.Name, country.Description));
-
-
 });
 
 countriesGroup.MapDelete("countries/{countryId}", async (int countryId, ForumDbContext dbContext) =>
@@ -102,7 +143,7 @@ citiesGroup.MapGet("cities/{cityId}", async (int countryId, int cityId,ForumDbCo
 
 
 
-citiesGroup.MapPost("cities", async (int countryId, [Validate] CreateCityDto createCityDto, ForumDbContext dbContext) =>
+citiesGroup.MapPost("cities", async (int countryId, [Validate] CreateCityDto createCityDto, HttpContext httpContext, ForumDbContext dbContext) =>
 {
     var existingCountry = await dbContext.Countries.FindAsync(countryId);
 
@@ -115,7 +156,8 @@ citiesGroup.MapPost("cities", async (int countryId, [Validate] CreateCityDto cre
     {
         Name = createCityDto.Name,
         Description = createCityDto.Description,
-        Country = existingCountry 
+        Country = existingCountry,
+        UserId = httpContext.User.FindFirstValue(JwtRegisteredClaimNames.Sub)
     };
 
     dbContext.Cities.Add(city);
@@ -210,7 +252,7 @@ placesGroup.MapGet("places/{placeId}", async (int countryId, int cityId, int pla
     return Results.Ok(new PlaceDto(place.Id, place.Name, place.Description, citydto));
 });
 
-placesGroup.MapPost("places", async (int cityId, int countryId, [Validate] CreatePlaceDto createPlaceDto, ForumDbContext dbContext) =>
+placesGroup.MapPost("places", async (int cityId, int countryId, [Validate] CreatePlaceDto createPlaceDto, HttpContext httpContext, ForumDbContext dbContext) =>
 {
     var existingCountry = await dbContext.Countries.FindAsync(countryId);
     if (existingCountry == null)
@@ -227,7 +269,8 @@ placesGroup.MapPost("places", async (int cityId, int countryId, [Validate] Creat
     {
         Name = createPlaceDto.Name,
         Description = createPlaceDto.Description,
-        City = existingCity
+        City = existingCity,
+        UserId = httpContext.User.FindFirstValue(JwtRegisteredClaimNames.Sub)
     };
 
     dbContext.Places.Add(place);
@@ -280,7 +323,14 @@ placesGroup.MapDelete("places/{placeId}", async (int countryId, int cityId, int 
     await dbContext.SaveChangesAsync();
     return Results.NoContent();
 });
+#endregion
+app.AddAuthApi();
+app.UseAuthentication();
+app.UseAuthorization();
 
+using var scope = app.Services.CreateScope();
+var dbSeeder = scope.ServiceProvider.GetRequiredService<AuthDbSeeder>();
+await dbSeeder.SeedAsync();
 
 app.Run();
 

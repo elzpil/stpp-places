@@ -1,9 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using stpp.Auth.Model;
 using stpp.Data.Entities;
 
 namespace stpp.Data
 {
-    public class ForumDbContext : DbContext
+    public class ForumDbContext : IdentityDbContext<ForumRestUser>
     {
         private readonly IConfiguration _configuration;
         public DbSet<Country> Countries { get; set; }

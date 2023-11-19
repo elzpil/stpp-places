@@ -1,4 +1,6 @@
 ﻿using FluentValidation;
+using stpp.Auth.Model;
+using System.ComponentModel.DataAnnotations;
 
 namespace stpp.Data.Entities
 {
@@ -6,7 +8,12 @@ namespace stpp.Data.Entities
     {
         public int Id { get; set; }
         public string Name { get; set; }    
-        public string Description { get; set; } 
+        public string Description { get; set; }
+
+        [Required]
+        public required string UserId { get; set; }
+        public ForumRestUser User { get; set; }
+
     
     public record CountryDto(int Id, string Name, string Description);
     public record CreateCountryDto(string Name, string Description);

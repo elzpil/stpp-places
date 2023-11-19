@@ -1,4 +1,6 @@
 ﻿using FluentValidation;
+using System.ComponentModel.DataAnnotations;
+using stpp.Auth.Model;
 using static stpp.Data.Entities.City;
 using static stpp.Data.Entities.Country;
 
@@ -10,6 +12,10 @@ namespace stpp.Data.Entities
         public required string Name { get; set; }
         public string Description { get; set; }
         public required City City { get; set; }
+
+        [Required]
+        public required string UserId { get; set; }
+        public ForumRestUser User { get; set; }
 
         public record PlaceDto(int Id, string Name, string Description, CityDto City);
         public record CreatePlaceDto(string Name, string Description, int CityId); // Representing the associated city as a DTO);
