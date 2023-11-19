@@ -324,11 +324,15 @@ placesGroup.MapDelete("places/{placeId}", async (int countryId, int cityId, int 
     return Results.NoContent();
 });
 #endregion
+
 app.AddAuthApi();
 app.UseAuthentication();
 app.UseAuthorization();
 
 using var scope = app.Services.CreateScope();
+
+var dbContext = scope.ServiceProvider.GetRequiredService<ForumDbContext>();
+dbContext.Database.Migrate();
 var dbSeeder = scope.ServiceProvider.GetRequiredService<AuthDbSeeder>();
 await dbSeeder.SeedAsync();
 
