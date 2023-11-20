@@ -98,11 +98,17 @@ countriesGroup.MapPut("countries/{countryId}", [Authorize(Roles = ForumRoles.For
     return Results.Ok(new CountryDto(country.Id, country.Name, country.Description));
 });
 
-countriesGroup.MapDelete("countries/{countryId}", async (int countryId, ForumDbContext dbContext) =>
+countriesGroup.MapDelete("countries/{countryId}", [Authorize(Roles = ForumRoles.ForumUser)] async (int countryId, HttpContext httpContext, ForumDbContext dbContext) =>
 {
     var country = await dbContext.Countries.FirstOrDefaultAsync(c => c.Id == countryId);
     if (country == null)
         return Results.NotFound();
+
+    if (!httpContext.User.IsInRole(ForumRoles.Admin) || httpContext.User.FindFirstValue(JwtRegisteredClaimNames.Sub) != country.UserId)
+    {
+        return Results.Forbid();
+    }
+
     dbContext.Remove(country); 
     await dbContext.SaveChangesAsync();
     return Results.NoContent();
@@ -128,7 +134,7 @@ citiesGroup.MapGet("cities", async (ForumDbContext dbContext, CancellationToken 
 });
 
 
-citiesGroup.MapGet("cities/{cityId}", async (int countryId, int cityId,ForumDbContext dbContext, CancellationToken cancellationToken) =>
+citiesGroup.MapGet("cities/{cityId}", async (int countryId, int cityId, ForumDbContext dbContext, CancellationToken cancellationToken) =>
 {
     var country = await dbContext.Countries.FirstOrDefaultAsync(c => c.Id == countryId);
     if (country == null)
@@ -143,7 +149,7 @@ citiesGroup.MapGet("cities/{cityId}", async (int countryId, int cityId,ForumDbCo
 
 
 
-citiesGroup.MapPost("cities", async (int countryId, [Validate] CreateCityDto createCityDto, HttpContext httpContext, ForumDbContext dbContext) =>
+citiesGroup.MapPost("cities", [Authorize(Roles = ForumRoles.ForumUser)] async (int countryId, [Validate] CreateCityDto createCityDto, HttpContext httpContext, ForumDbContext dbContext) =>
 {
     var existingCountry = await dbContext.Countries.FindAsync(countryId);
 
@@ -166,7 +172,7 @@ citiesGroup.MapPost("cities", async (int countryId, [Validate] CreateCityDto cre
     return Results.Created($"api/countries/{existingCountry.Id}/cities/{city.Id}", new CityDto(city.Id, city.Name, city.Description, new CountryDto(existingCountry.Id, existingCountry.Name, existingCountry.Description)));
 });
 
-citiesGroup.MapPut("cities/{cityId}", async (int countryId, int cityId, [Validate] UpdateCityDto dto, ForumDbContext dbContext) =>
+citiesGroup.MapPut("cities/{cityId}", [Authorize(Roles = ForumRoles.ForumUser)]  async (int countryId, int cityId, [Validate] UpdateCityDto dto, HttpContext httpContext, ForumDbContext dbContext) =>
 {
     var country = await dbContext.Countries.FirstOrDefaultAsync(c => c.Id == countryId);
     if (country == null)
@@ -175,6 +181,12 @@ citiesGroup.MapPut("cities/{cityId}", async (int countryId, int cityId, [Validat
     var city = await dbContext.Cities.FirstOrDefaultAsync(c => c.Id == cityId && c.Country.Id == countryId);
     if (city == null)
         return Results.NotFound();
+
+    if (!httpContext.User.IsInRole(ForumRoles.Admin) || httpContext.User.FindFirstValue(JwtRegisteredClaimNames.Sub) != city.UserId)
+    {
+        return Results.Forbid();
+    }
+
     city.Description = dto.Description;
     dbContext.Update(city);
     await dbContext.SaveChangesAsync();
@@ -184,7 +196,7 @@ citiesGroup.MapPut("cities/{cityId}", async (int countryId, int cityId, [Validat
 
 });
 
-citiesGroup.MapDelete("cities/{cityId}", async (int countryId, int cityId, ForumDbContext dbContext) =>
+citiesGroup.MapDelete("cities/{cityId}", [Authorize(Roles = ForumRoles.ForumUser)] async (int countryId, int cityId, HttpContext httpContext, ForumDbContext dbContext) =>
 {
     var country = await dbContext.Countries.FirstOrDefaultAsync(c => c.Id == countryId);
     if (country == null)
@@ -193,6 +205,12 @@ citiesGroup.MapDelete("cities/{cityId}", async (int countryId, int cityId, Forum
     var city = await dbContext.Cities.FirstOrDefaultAsync(c => c.Id == cityId && c.Country.Id == countryId);
     if (city == null)
         return Results.NotFound();
+
+    if (!httpContext.User.IsInRole(ForumRoles.Admin) || httpContext.User.FindFirstValue(JwtRegisteredClaimNames.Sub) != city.UserId)
+    {
+        return Results.Forbid();
+    }
+
     dbContext.Remove(city);
     await dbContext.SaveChangesAsync();
     return Results.NoContent();
@@ -252,7 +270,7 @@ placesGroup.MapGet("places/{placeId}", async (int countryId, int cityId, int pla
     return Results.Ok(new PlaceDto(place.Id, place.Name, place.Description, citydto));
 });
 
-placesGroup.MapPost("places", async (int cityId, int countryId, [Validate] CreatePlaceDto createPlaceDto, HttpContext httpContext, ForumDbContext dbContext) =>
+placesGroup.MapPost("places", [Authorize(Roles = ForumRoles.ForumUser)] async (int cityId, int countryId, [Validate] CreatePlaceDto createPlaceDto, HttpContext httpContext, ForumDbContext dbContext) =>
 {
     var existingCountry = await dbContext.Countries.FindAsync(countryId);
     if (existingCountry == null)
@@ -285,7 +303,7 @@ placesGroup.MapPost("places", async (int cityId, int countryId, [Validate] Creat
 
 });
 
-placesGroup.MapPut("places/{placeId}", async (int countryId, int cityId, int placeId, [Validate] UpdatePlaceDto dto, ForumDbContext dbContext) =>
+placesGroup.MapPut("places/{placeId}", [Authorize(Roles = ForumRoles.ForumUser)] async (int countryId, int cityId, int placeId, [Validate] UpdatePlaceDto dto, HttpContext httpContext, ForumDbContext dbContext) =>
 {
     var country = await dbContext.Countries.FirstOrDefaultAsync(c => c.Id == countryId);
     if (country == null)
@@ -298,6 +316,12 @@ placesGroup.MapPut("places/{placeId}", async (int countryId, int cityId, int pla
     var place = await dbContext.Places.FirstOrDefaultAsync(c => c.Id == placeId && c.City.Id == cityId);
     if (place == null)
         return Results.NotFound();
+
+    if (!httpContext.User.IsInRole(ForumRoles.Admin) || httpContext.User.FindFirstValue(JwtRegisteredClaimNames.Sub) != place.UserId)
+    {
+        return Results.Forbid();
+    }
+
     place.Description = dto.Description;
     dbContext.Update(place);
     await dbContext.SaveChangesAsync();
@@ -305,7 +329,7 @@ placesGroup.MapPut("places/{placeId}", async (int countryId, int cityId, int pla
     return Results.Ok(new PlaceDto(place.Id, place.Name, place.Description, citydto));
 });
 
-placesGroup.MapDelete("places/{placeId}", async (int countryId, int cityId, int placeId, ForumDbContext dbContext) =>
+placesGroup.MapDelete("places/{placeId}", [Authorize(Roles = ForumRoles.ForumUser)] async (int countryId, int cityId, int placeId, ForumDbContext dbContext) =>
 {
     var country = await dbContext.Countries.FirstOrDefaultAsync(c => c.Id == countryId);
     if (country == null)
@@ -318,6 +342,12 @@ placesGroup.MapDelete("places/{placeId}", async (int countryId, int cityId, int 
     var place = await dbContext.Places.FirstOrDefaultAsync(p => p.Id == placeId && p.City.Id == cityId);
     if (place == null)
         return Results.NotFound();
+
+    if (!httpContext.User.IsInRole(ForumRoles.Admin) || httpContext.User.FindFirstValue(JwtRegisteredClaimNames.Sub) != place.UserId)
+    {
+        return Results.Forbid();
+    }
+
 
     dbContext.Remove(place);
     await dbContext.SaveChangesAsync();
