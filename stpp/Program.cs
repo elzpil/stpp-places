@@ -87,7 +87,7 @@ countriesGroup.MapPut("countries/{countryId}", [Authorize(Roles = ForumRoles.For
     if (country == null)
         return Results.NotFound();
 
-    if(!httpContext.User.IsInRole(ForumRoles.Admin) || httpContext.User.FindFirstValue(JwtRegisteredClaimNames.Sub)!= country.UserId)
+    if(!httpContext.User.IsInRole(ForumRoles.Admin) && httpContext.User.FindFirstValue(JwtRegisteredClaimNames.Sub)!= country.UserId)
     {
         return Results.Forbid();
     }
@@ -104,7 +104,7 @@ countriesGroup.MapDelete("countries/{countryId}", [Authorize(Roles = ForumRoles.
     if (country == null)
         return Results.NotFound();
 
-    if (!httpContext.User.IsInRole(ForumRoles.Admin) || httpContext.User.FindFirstValue(JwtRegisteredClaimNames.Sub) != country.UserId)
+    if (!httpContext.User.IsInRole(ForumRoles.Admin) && httpContext.User.FindFirstValue(JwtRegisteredClaimNames.Sub) != country.UserId)
     {
         return Results.Forbid();
     }
@@ -182,7 +182,7 @@ citiesGroup.MapPut("cities/{cityId}", [Authorize(Roles = ForumRoles.ForumUser)] 
     if (city == null)
         return Results.NotFound();
 
-    if (!httpContext.User.IsInRole(ForumRoles.Admin) || httpContext.User.FindFirstValue(JwtRegisteredClaimNames.Sub) != city.UserId)
+    if (!httpContext.User.IsInRole(ForumRoles.Admin) && httpContext.User.FindFirstValue(JwtRegisteredClaimNames.Sub) != city.UserId)
     {
         return Results.Forbid();
     }
@@ -196,7 +196,7 @@ citiesGroup.MapPut("cities/{cityId}", [Authorize(Roles = ForumRoles.ForumUser)] 
 
 });
 
-citiesGroup.MapDelete("cities/{cityId}", [Authorize(Roles = ForumRoles.ForumUser)] async (int countryId, int cityId, HttpContext httpContext, ForumDbContext dbContext) =>
+citiesGroup.MapDelete("cities/{cityId}", [Authorize(Roles = ForumRoles.ForumUser + "," + ForumRoles.Admin)] async (int countryId, int cityId, HttpContext httpContext, ForumDbContext dbContext) =>
 {
     var country = await dbContext.Countries.FirstOrDefaultAsync(c => c.Id == countryId);
     if (country == null)
@@ -206,7 +206,7 @@ citiesGroup.MapDelete("cities/{cityId}", [Authorize(Roles = ForumRoles.ForumUser
     if (city == null)
         return Results.NotFound();
 
-    if (!httpContext.User.IsInRole(ForumRoles.Admin) || httpContext.User.FindFirstValue(JwtRegisteredClaimNames.Sub) != city.UserId)
+    if (!httpContext.User.IsInRole(ForumRoles.Admin) && httpContext.User.FindFirstValue(JwtRegisteredClaimNames.Sub) != city.UserId)
     {
         return Results.Forbid();
     }
@@ -317,7 +317,7 @@ placesGroup.MapPut("places/{placeId}", [Authorize(Roles = ForumRoles.ForumUser)]
     if (place == null)
         return Results.NotFound();
 
-    if (!httpContext.User.IsInRole(ForumRoles.Admin) || httpContext.User.FindFirstValue(JwtRegisteredClaimNames.Sub) != place.UserId)
+    if (!httpContext.User.IsInRole(ForumRoles.Admin) && httpContext.User.FindFirstValue(JwtRegisteredClaimNames.Sub) != place.UserId)
     {
         return Results.Forbid();
     }
@@ -343,7 +343,7 @@ placesGroup.MapDelete("places/{placeId}", [Authorize(Roles = ForumRoles.ForumUse
     if (place == null)
         return Results.NotFound();
 
-    if (!httpContext.User.IsInRole(ForumRoles.Admin) || httpContext.User.FindFirstValue(JwtRegisteredClaimNames.Sub) != place.UserId)
+    if (!httpContext.User.IsInRole(ForumRoles.Admin) && httpContext.User.FindFirstValue(JwtRegisteredClaimNames.Sub) != place.UserId)
     {
         return Results.Forbid();
     }
