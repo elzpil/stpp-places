@@ -329,7 +329,7 @@ placesGroup.MapPut("places/{placeId}", [Authorize(Roles = ForumRoles.ForumUser)]
     return Results.Ok(new PlaceDto(place.Id, place.Name, place.Description, citydto));
 });
 
-placesGroup.MapDelete("places/{placeId}", [Authorize(Roles = ForumRoles.ForumUser)] async (int countryId, int cityId, int placeId, ForumDbContext dbContext) =>
+placesGroup.MapDelete("places/{placeId}", [Authorize(Roles = ForumRoles.ForumUser)] async (int countryId, int cityId, int placeId, HttpContext httpContext, ForumDbContext dbContext) =>
 {
     var country = await dbContext.Countries.FirstOrDefaultAsync(c => c.Id == countryId);
     if (country == null)
