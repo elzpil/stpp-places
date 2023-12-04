@@ -32,7 +32,8 @@ builder.Services.AddCors(options =>
         builder => builder.WithOrigins("http://localhost:3000")
                           .AllowAnyHeader()
                           .AllowAnyMethod()
-                          .AllowCredentials());
+                          .AllowCredentials()
+                          .WithHeaders("content-type"));
 });
 
 builder.Services.AddDbContext<ForumDbContext>();
