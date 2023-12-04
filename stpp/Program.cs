@@ -26,7 +26,7 @@ JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
 var builder = WebApplication.CreateBuilder(args);
 
-services.AddCors(options =>
+builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowLocalhost3000",
         builder => builder.WithOrigins("http://localhost:3000")
