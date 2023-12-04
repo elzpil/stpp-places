@@ -20,22 +20,19 @@ using Microsoft.AspNetCore.Http;
 using System.Net.Http;
 using stpp.Auth;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
 var builder = WebApplication.CreateBuilder(args);
 
-//builder.Services.AddCors(options =>
-//{
-//    options.AddPolicy("AllowAllOrigins",
-//        builder =>
-//        {
-//            builder.AllowAnyOrigin();
-//            builder.AllowAnyHeader().WithExposedHeaders("Content-type"); 
-//            builder.AllowAnyMethod();
-//            builder.WithHeaders("Content-Type");
-//        });
-//});
+services.AddCors(options =>
+{
+    options.AddPolicy("AllowLocalhost3000",
+        builder => builder.WithOrigins("http://localhost:3000")
+                          .AllowAnyHeader()
+                          .AllowAnyMethod());
+});
 
 builder.Services.AddDbContext<ForumDbContext>();
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
@@ -64,6 +61,7 @@ builder.Services.AddAuthorization();
 
 
 var app = builder.Build();
+app.UseCors("AllowLocalhost3000");
 
 #region Endpoints
 //country,city,place
@@ -371,7 +369,6 @@ placesGroup.MapDelete("places/{placeId}", [Authorize(Roles = ForumRoles.ForumUse
 });
 #endregion
 
-//app.UseCors("AllowAllOrigins");
 
 app.AddAuthApi();
 app.UseAuthentication();
