@@ -25,17 +25,17 @@ JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAllOrigins",
-        builder =>
-        {
-            builder.AllowAnyOrigin();
-            builder.AllowAnyHeader().WithExposedHeaders("content-type"); 
-            builder.AllowAnyMethod();
-            builder.WithHeaders("Content-Type");
-        });
-});
+//builder.Services.AddCors(options =>
+//{
+//    options.AddPolicy("AllowAllOrigins",
+//        builder =>
+//        {
+//            builder.AllowAnyOrigin();
+//            builder.AllowAnyHeader().WithExposedHeaders("Content-type"); 
+//            builder.AllowAnyMethod();
+//            builder.WithHeaders("Content-Type");
+//        });
+//});
 
 builder.Services.AddDbContext<ForumDbContext>();
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
@@ -371,7 +371,7 @@ placesGroup.MapDelete("places/{placeId}", [Authorize(Roles = ForumRoles.ForumUse
 });
 #endregion
 
-app.UseCors("AllowAllOrigins");
+//app.UseCors("AllowAllOrigins");
 
 app.AddAuthApi();
 app.UseAuthentication();
