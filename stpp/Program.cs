@@ -366,6 +366,8 @@ placesGroup.MapDelete("places/{placeId}", [Authorize(Roles = ForumRoles.ForumUse
 });
 #endregion
 
+app.UseCors("AllowAll");
+
 app.AddAuthApi();
 app.UseAuthentication();
 app.UseAuthorization();
