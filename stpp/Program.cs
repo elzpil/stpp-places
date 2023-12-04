@@ -47,6 +47,17 @@ builder.Services.AddAuthentication(options =>
 });
 builder.Services.AddAuthorization();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        builder => builder
+            .AllowAnyOrigin()
+            .AllowAnyMethod()  // Allow any method, including the preflight OPTIONS method
+            .AllowAnyHeader());
+});
+
+
+
 var app = builder.Build();
 
 #region Endpoints
