@@ -27,7 +27,10 @@ namespace stpp.Auth
                 var createUserResult = await userManager.CreateAsync(newUser, registerUserDto.Password);
 
                 if (!createUserResult.Succeeded)
-                    return Results.UnprocessableEntity("failed to register");
+                {
+                    var errorMessages = string.Join(", ", createUserResult.Errors.Select(error => error.Description));
+                    return Results.UnprocessableEntity($"Failed to register: {errorMessages}");
+                }
 
                 await userManager.AddToRoleAsync(newUser, ForumRoles.ForumUser);
 
