@@ -33,7 +33,8 @@ builder.Services.AddCors(options =>
                           .AllowAnyHeader()
                           .AllowAnyMethod()
                           .AllowCredentials()
-                          .WithHeaders("content-type"));
+                          .WithHeaders("content-type")
+                          .WithExposedHeaders("content-type"));
 });
 
 builder.Services.AddDbContext<ForumDbContext>();
