@@ -240,20 +240,18 @@ citiesGroup.MapDelete("cities/{cityId}", [Authorize(Roles = ForumRoles.ForumUser
 
 
 
-
 var placesGroup = app.MapGroup("/api/countries/{countryId}/cities/{cityId}").WithValidationFilter();
 
-
-placesGroup.MapGet("places", async (ForumDbContext dbContext, CancellationToken cancellationToken) =>
+placesGroup.MapGet("places", async (int countryId, int cityId, ForumDbContext dbContext, CancellationToken cancellationToken) =>
 {
     var places = await dbContext.Places
         .Include(p => p.City)
             .ThenInclude(c => c.Country)
+        .Where(p => p.City.Country.Id == countryId && p.City.Id == cityId)  // Filter places by countryId and cityId
         .ToListAsync(cancellationToken);
 
     var placeDtos = places.Select(place =>
     {
-
         CityDto cityDto = null;
         if (place.City != null)
         {
