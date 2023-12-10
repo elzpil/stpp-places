@@ -104,7 +104,11 @@ countriesGroup.MapPut("countries/{countryId}", [Authorize(Roles = ForumRoles.Adm
     if (country == null)
         return Results.NotFound();
 
-    if (!httpContext.User.IsInRole(ForumRoles.Admin) && httpContext.User.FindFirstValue(JwtRegisteredClaimNames.Sub) != country.UserId)
+    if (!httpContext.User.IsInRole(ForumRoles.Admin))
+    {
+        return Results.Forbid();
+    }
+    if(httpContext.User.FindFirstValue(JwtRegisteredClaimNames.Sub) != country.UserId)
     {
         return Results.Forbid();
     }
