@@ -85,7 +85,7 @@ countriesGroup.MapGet("countries/{countryId}", async (int countryId, ForumDbCont
     return Results.Ok(new CountryDto(country.Id, country.Name, country.Description));
 });
 
-countriesGroup.MapPost("countries", [Authorize(Roles =ForumRoles.ForumUser)] async ([Validate] CreateCountryDto createCountryDto, HttpContext httpContext, ForumDbContext dbContext) =>
+countriesGroup.MapPost("countries", [Authorize(Roles = ForumRoles.Admin + "," + ForumRoles.ForumUser)] async ([Validate] CreateCountryDto createCountryDto, HttpContext httpContext, ForumDbContext dbContext) =>
 {
     var country = new Country()
     {
@@ -104,11 +104,7 @@ countriesGroup.MapPut("countries/{countryId}", [Authorize(Roles = ForumRoles.Adm
     if (country == null)
         return Results.NotFound();
 
-    if (!httpContext.User.IsInRole(ForumRoles.Admin))
-    {
-        return Results.Forbid();
-    }
-    if(httpContext.User.FindFirstValue(JwtRegisteredClaimNames.Sub) != country.UserId)
+    if(httpContext.User.FindFirstValue(JwtRegisteredClaimNames.Sub) != country.UserId && !httpContext.User.IsInRole(ForumRoles.Admin))
     {
         return Results.Forbid();
     }
