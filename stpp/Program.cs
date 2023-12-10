@@ -98,13 +98,13 @@ countriesGroup.MapPost("countries", [Authorize(Roles =ForumRoles.ForumUser)] asy
     return Results.Created("api/countries/{country.Id}", new CountryDto(country.Id, country.Name, country.Description));
 });
 
-countriesGroup.MapPut("countries/{countryId}", [Authorize(Roles = ForumRoles.ForumUser)] async (int countryId, [Validate]UpdateCountryDto dto, HttpContext httpContext, ForumDbContext dbContext) =>
+countriesGroup.MapPut("countries/{countryId}", [Authorize(Roles = ForumRoles.Admin + "," + ForumRoles.ForumUser)] async (int countryId, [Validate] UpdateCountryDto dto, HttpContext httpContext, ForumDbContext dbContext) =>
 {
     var country = await dbContext.Countries.FirstOrDefaultAsync(c => c.Id == countryId);
     if (country == null)
         return Results.NotFound();
 
-    if(!httpContext.User.IsInRole(ForumRoles.Admin) && httpContext.User.FindFirstValue(JwtRegisteredClaimNames.Sub)!= country.UserId)
+    if (!httpContext.User.IsInRole(ForumRoles.Admin) && httpContext.User.FindFirstValue(JwtRegisteredClaimNames.Sub) != country.UserId)
     {
         return Results.Forbid();
     }
@@ -114,6 +114,7 @@ countriesGroup.MapPut("countries/{countryId}", [Authorize(Roles = ForumRoles.For
     await dbContext.SaveChangesAsync();
     return Results.Ok(new CountryDto(country.Id, country.Name, country.Description));
 });
+
 
 countriesGroup.MapDelete("countries/{countryId}", [Authorize(Roles = ForumRoles.ForumUser)] async (int countryId, HttpContext httpContext, ForumDbContext dbContext) =>
 {
