@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "md69Xu2tvef6rwglsnK7lDILO87D1W+UXsYUpWGV3VqCYYBZwvbUK/+jKAYiOP4g18uAqB8h0F2Ry0KsaD2mbw==",
+  "dgSpecHash": "oXVNfxBeGXkKwnXYm/xGIxThgftMQGosBqz8pY5/06rPrn4O5NpzOFe8kRK7/TV18+kTTHNKREFSTswJG9o1XQ==",
   "success": true,
-  "projectFilePath": "C:\\Users\\user\\Desktop\\stpp\\stpp-places\\stpp\\stpp.csproj",
+  "projectFilePath": "C:\\Users\\user\\Desktop\\git\\stpp_places\\stpp-places\\stpp\\stpp.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\user\\.nuget\\packages\\fluentvalidation\\11.7.1\\fluentvalidation.11.7.1.nupkg.sha512",
     "C:\\Users\\user\\.nuget\\packages\\fluentvalidation.dependencyinjectionextensions\\11.7.1\\fluentvalidation.dependencyinjectionextensions.11.7.1.nupkg.sha512",
@@ -72,7 +72,11 @@
     "C:\\Users\\user\\.nuget\\packages\\system.security.permissions\\4.5.0\\system.security.permissions.4.5.0.nupkg.sha512",
     "C:\\Users\\user\\.nuget\\packages\\system.security.principal.windows\\4.5.0\\system.security.principal.windows.4.5.0.nupkg.sha512",
     "C:\\Users\\user\\.nuget\\packages\\system.text.encodings.web\\7.0.0\\system.text.encodings.web.7.0.0.nupkg.sha512",
-    "C:\\Users\\user\\.nuget\\packages\\system.text.json\\7.0.0\\system.text.json.7.0.0.nupkg.sha512"
+    "C:\\Users\\user\\.nuget\\packages\\system.text.json\\7.0.0\\system.text.json.7.0.0.nupkg.sha512",
+    "C:\\Users\\user\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\7.0.16\\microsoft.windowsdesktop.app.ref.7.0.16.nupkg.sha512",
+    "C:\\Users\\user\\.nuget\\packages\\microsoft.netcore.app.ref\\7.0.16\\microsoft.netcore.app.ref.7.0.16.nupkg.sha512",
+    "C:\\Users\\user\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\7.0.16\\microsoft.aspnetcore.app.ref.7.0.16.nupkg.sha512",
+    "C:\\Users\\user\\.nuget\\packages\\microsoft.netcore.app.host.win-x64\\7.0.16\\microsoft.netcore.app.host.win-x64.7.0.16.nupkg.sha512"
   ],
   "logs": []
 }

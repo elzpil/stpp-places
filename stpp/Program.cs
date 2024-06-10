@@ -21,6 +21,7 @@ using System.Net.Http;
 using stpp.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
+using static stpp.Data.Entities.Comment;
 
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
@@ -373,6 +374,72 @@ placesGroup.MapDelete("places/{placeId}", [Authorize(Roles = ForumRoles.Admin + 
     await dbContext.SaveChangesAsync();
     return Results.NoContent();
 });
+
+var commentsGroup = app.MapGroup("/api/things").WithValidationFilter();
+
+
+commentsGroup.MapGet("comments", async (ForumDbContext dbContext, CancellationToken cancellationToken) =>
+{
+    return (await dbContext.Comments.ToListAsync(cancellationToken)).Select(o => new CommentDto(o.Id, o.Content, o.EntityType, o.EntityId, o.UserId));
+});
+
+commentsGroup.MapGet("comments/{commentId}", async (int commentId, ForumDbContext dbContext) =>
+{
+    var comment = await dbContext.Comments.FirstOrDefaultAsync(c => c.Id == commentId);
+    if (comment == null)
+        return Results.NotFound();
+
+    return Results.Ok(new CommentDto(comment.Id, comment.Content, comment.EntityType, comment.EntityId, comment.UserId));
+});
+
+commentsGroup.MapPost("comments", [Authorize(Roles = ForumRoles.Admin + "," + ForumRoles.ForumUser)] async ([Validate] CreateCommentDto createCommentDto, HttpContext httpContext, ForumDbContext dbContext) =>
+{
+    var comment = new Comment()
+    {
+        Content = createCommentDto.Content,
+        EntityType = createCommentDto.EntityType,
+        EntityId = createCommentDto.EntityId,
+        UserId = httpContext.User.FindFirstValue(JwtRegisteredClaimNames.Sub)
+    };
+    dbContext.Comments.Add(comment);
+    await dbContext.SaveChangesAsync();
+    return Results.Created("api/comments/{comment.Id}", new CommentDto(comment.Id, comment.Content, comment.EntityType, comment.EntityId, comment.UserId));
+});
+
+commentsGroup.MapPut("comments/{commentId}", [Authorize(Roles = ForumRoles.Admin + "," + ForumRoles.ForumUser)] async (int commentId, [Validate] UpdateCommentDto dto, HttpContext httpContext, ForumDbContext dbContext) =>
+{
+    var comment = await dbContext.Comments.FirstOrDefaultAsync(c => c.Id == commentId);
+    if (comment == null)
+        return Results.NotFound();
+
+    if (httpContext.User.FindFirstValue(JwtRegisteredClaimNames.Sub) != comment.UserId && !httpContext.User.IsInRole(ForumRoles.Admin))
+    {
+        return Results.Forbid();
+    }
+
+    comment.Content = dto.Content;
+    dbContext.Update(comment);
+    await dbContext.SaveChangesAsync();
+    return Results.Ok(new CommentDto(comment.Id, comment.Content, comment.EntityType, comment.EntityId, comment.UserId));
+});
+
+
+commentsGroup.MapDelete("comments/{commentId}", [Authorize(Roles = ForumRoles.Admin + "," + ForumRoles.ForumUser)] async (int commentId, HttpContext httpContext, ForumDbContext dbContext) =>
+{
+    var comment = await dbContext.Comments.FirstOrDefaultAsync(c => c.Id == commentId);
+    if (comment == null)
+        return Results.NotFound();
+
+    if (!httpContext.User.IsInRole(ForumRoles.Admin) && httpContext.User.FindFirstValue(JwtRegisteredClaimNames.Sub) != comment.UserId)
+    {
+        return Results.Forbid();
+    }
+
+    dbContext.Remove(comment);
+    await dbContext.SaveChangesAsync();
+    return Results.NoContent();
+});
+
 #endregion
 
 

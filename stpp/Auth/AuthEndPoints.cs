@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using stpp.Auth.Model;
+using stpp.Data;
 using System.IdentityModel.Tokens.Jwt;
 using System.Runtime.CompilerServices;
 using System.Security.Claims;
@@ -10,6 +11,28 @@ namespace stpp.Auth
     {
         public static void AddAuthApi(this WebApplication app)
         {
+            //getuser
+            app.MapGet("users/{userId}", async (string userId, UserManager<ForumRestUser> userManager) =>
+            {
+                var user = await userManager.FindByIdAsync(userId);
+                if (user == null)
+                {
+                    return Results.UnprocessableEntity("user not found");
+                }
+                return Results.Ok(new String(user.UserName));
+
+            });
+
+            app.MapGet("users/me", async (UserManager<ForumRestUser> userManager, HttpContext httpContext) =>
+            {
+                var user = await userManager.GetUserAsync(httpContext.User);
+                if (user == null)
+                {
+                    return Results.UnprocessableEntity("User not found");
+                }
+                return Results.Ok(new { user.UserName, user.Id });
+            });
+
             //register
             app.MapPost("api/register", async (UserManager<ForumRestUser> userManager, RegisterUserDto registerUserDto) =>
             {

@@ -14,6 +14,7 @@ namespace stpp.Data
         public DbSet<City> Cities { get; set; }
 
         public DbSet<Place> Places { get; set; }
+        public DbSet<Comment> Comments { get; set; }
 
         public ForumDbContext(IConfiguration configuration)
         {
