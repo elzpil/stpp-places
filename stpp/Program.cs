@@ -22,6 +22,8 @@ using stpp.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using static stpp.Data.Entities.Comment;
+using System.Net.Http;
+using Newtonsoft.Json;
 
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
@@ -166,11 +168,36 @@ citiesGroup.MapGet("cities/{cityId}", async (int countryId, int cityId, ForumDbC
     var city = await dbContext.Cities.FirstOrDefaultAsync(c => c.Id == cityId && c.Country.Id == countryId);
     if (city == null)
         return Results.NotFound();
+    var cityCreateDto = new CityCreateDto(city.Id, city.Name, city.Description, city.Latitude, city.Longitude,
+            new CountryDto(country.Id, country.Name, country.Description));
 
-    return Results.Ok(new CityDto(city.Id, city.Name, city.Description, new CountryDto(city.Country.Id, city.Country.Name, city.Country.Description)));
+    return Results.Ok(cityCreateDto);
 });
 
 
+
+//citiesGroup.MapPost("cities", [Authorize(Roles = ForumRoles.Admin + "," + ForumRoles.ForumUser)] async (int countryId, [Validate] CreateCityDto createCityDto, HttpContext httpContext, ForumDbContext dbContext) =>
+//{
+//    var existingCountry = await dbContext.Countries.FindAsync(countryId);
+
+//    if (existingCountry == null)
+//    {
+//        return Results.NotFound();
+//    }
+
+//    var city = new City
+//    {
+//        Name = createCityDto.Name,
+//        Description = createCityDto.Description,
+//        Country = existingCountry,
+//        UserId = httpContext.User.FindFirstValue(JwtRegisteredClaimNames.Sub)
+//    };
+
+//    dbContext.Cities.Add(city);
+//    await dbContext.SaveChangesAsync();
+
+//    return Results.Created($"api/countries/{existingCountry.Id}/cities/{city.Id}", new CityDto(city.Id, city.Name, city.Description, new CountryDto(existingCountry.Id, existingCountry.Name, existingCountry.Description)));
+//});
 
 citiesGroup.MapPost("cities", [Authorize(Roles = ForumRoles.Admin + "," + ForumRoles.ForumUser)] async (int countryId, [Validate] CreateCityDto createCityDto, HttpContext httpContext, ForumDbContext dbContext) =>
 {
@@ -181,19 +208,54 @@ citiesGroup.MapPost("cities", [Authorize(Roles = ForumRoles.Admin + "," + ForumR
         return Results.NotFound();
     }
 
-    var city = new City
+    // Fetch coordinates using the geocoding API
+    var cityName = createCityDto.Name;
+    var apiKey = "apikey";
+    var httpClient = new HttpClient();
+    var response = await httpClient.GetAsync($"https://maps.googleapis.com/maps/api/geocode/json?address={cityName}&key={apiKey}");
+
+    if (response.IsSuccessStatusCode)
     {
-        Name = createCityDto.Name,
-        Description = createCityDto.Description,
-        Country = existingCountry,
-        UserId = httpContext.User.FindFirstValue(JwtRegisteredClaimNames.Sub)
-    };
+        var json = await response.Content.ReadAsStringAsync();
+        Console.WriteLine(json);
+        dynamic data = JsonConvert.DeserializeObject(json);
+        if (data.results.Count == 0)
+        {
+            // No results found for the city name
+            return Results.BadRequest("No results found for the city name.");
+        }
 
-    dbContext.Cities.Add(city);
-    await dbContext.SaveChangesAsync();
+        var location = data.results[0].geometry.location;
+        var latitude = location.lat;
+        var longitude = location.lng;
 
-    return Results.Created($"api/countries/{existingCountry.Id}/cities/{city.Id}", new CityDto(city.Id, city.Name, city.Description, new CountryDto(existingCountry.Id, existingCountry.Name, existingCountry.Description)));
+        var city = new City
+        {
+            Name = createCityDto.Name,
+            Description = createCityDto.Description,
+            Latitude = latitude,
+            Longitude = longitude,
+            Country = existingCountry,
+            UserId = httpContext.User.FindFirstValue(JwtRegisteredClaimNames.Sub)
+        };
+
+        dbContext.Cities.Add(city);
+        await dbContext.SaveChangesAsync();
+
+        // Create DTOs for response
+        var cityCreateDto = new CityCreateDto(city.Id, city.Name, city.Description, city.Latitude, city.Longitude,
+            new CountryDto(existingCountry.Id, existingCountry.Name, existingCountry.Description));
+
+        return Results.Created($"api/countries/{existingCountry.Id}/cities/{city.Id}", cityCreateDto);
+    }
+    else
+    {
+        // Handle error case when coordinates cannot be fetched
+        return Results.BadRequest("Failed to fetch coordinates for the city.");
+    }
 });
+
+
 
 citiesGroup.MapPut("cities/{cityId}", [Authorize(Roles = ForumRoles.Admin + "," + ForumRoles.ForumUser)] async (int countryId, int cityId, [Validate] UpdateCityDto dto, HttpContext httpContext, ForumDbContext dbContext) =>
 {

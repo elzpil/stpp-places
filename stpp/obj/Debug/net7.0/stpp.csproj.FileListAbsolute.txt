@@ -161,4 +161,5 @@ C:\Users\user\Desktop\git\stpp_places\stpp-places\stpp\obj\Debug\net7.0\refint\s
 C:\Users\user\Desktop\git\stpp_places\stpp-places\stpp\obj\Debug\net7.0\stpp.pdb
 C:\Users\user\Desktop\git\stpp_places\stpp-places\stpp\obj\Debug\net7.0\stpp.genruntimeconfig.cache
 C:\Users\user\Desktop\git\stpp_places\stpp-places\stpp\obj\Debug\net7.0\ref\stpp.dll
+C:\Users\user\Desktop\git\stpp_places\stpp-places\stpp\bin\Debug\net7.0\Newtonsoft.Json.dll
 C:\Users\user\Desktop\git\stpp_places\stpp-places\stpp\obj\Debug\net7.0\stpp.csproj.CopyComplete
