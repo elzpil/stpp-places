@@ -1,3 +1,8 @@
+Papildymas: 
+- gali kurti ir skaityti komentarus
+- google maps api naudojimas miestu zemelapiams
+
+
 <b>Sistemos paskirtis</b>
 </br>
 Projektas skirtas lankomų miesto vietų pristatymui žmonėms. Jis sudarytas iš internetinės aplikacijos ir API, naudojama duomenų bazė.
