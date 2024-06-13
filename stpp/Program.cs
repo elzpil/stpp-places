@@ -211,6 +211,27 @@ citiesGroup.MapPost("cities", [Authorize(Roles = ForumRoles.Admin + "," + ForumR
     // Fetch coordinates using the geocoding API
     var cityName = createCityDto.Name;
     var apiKey = "apikey";
+    if (apiKey == "apikey")
+    {
+        var city = new City
+        {
+            Name = createCityDto.Name,
+            Description = createCityDto.Description,
+            Latitude = 0.0,
+            Longitude = 0.0,
+            Country = existingCountry,
+            UserId = httpContext.User.FindFirstValue(JwtRegisteredClaimNames.Sub)
+        };
+
+        dbContext.Cities.Add(city);
+        await dbContext.SaveChangesAsync();
+
+        // Create DTOs for response
+        var cityCreateDto = new CityCreateDto(city.Id, city.Name, city.Description, city.Latitude, city.Longitude,
+            new CountryDto(existingCountry.Id, existingCountry.Name, existingCountry.Description));
+
+        return Results.Created($"api/countries/{existingCountry.Id}/cities/{city.Id}", cityCreateDto);
+    }
     var httpClient = new HttpClient();
     var response = await httpClient.GetAsync($"https://maps.googleapis.com/maps/api/geocode/json?address={cityName}&key={apiKey}");
 
