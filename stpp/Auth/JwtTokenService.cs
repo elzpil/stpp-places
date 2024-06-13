@@ -60,7 +60,7 @@ namespace stpp.Auth
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        public bool TryParseREfreshToken(string refreshToken, out ClaimsPrincipal? claims)
+        public bool TryParseRefreshToken(string refreshToken, out ClaimsPrincipal? claims)
         {
             claims = null;
             try

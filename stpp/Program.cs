@@ -273,10 +273,12 @@ citiesGroup.MapPut("cities/{cityId}", [Authorize(Roles = ForumRoles.Admin + "," 
     }
 
     city.Description = dto.Description;
+    city.Longitude = dto.Longtitude;
+    city.Latitude = dto.Latitude;
     dbContext.Update(city);
     await dbContext.SaveChangesAsync();
 
-    return Results.Ok(new CityDto(city.Id, city.Name, city.Description, new CountryDto(country.Id, country.Name, country.Description)));
+    return Results.Ok(new CityCreateDto(city.Id, city.Name, city.Description, city.Latitude, city.Longitude, new CountryDto(country.Id, country.Name, country.Description)));
 
 
 });
