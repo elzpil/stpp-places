@@ -23,15 +23,33 @@ namespace stpp.Auth
 
             });
 
+            //app.MapGet("users/me", async (UserManager<ForumRestUser> userManager, HttpContext httpContext) =>
+            //{
+            //    var user = await userManager.GetUserAsync(httpContext.User);
+            //    if (user == null)
+            //    {
+            //        return Results.UnprocessableEntity("User not found");
+            //    }
+            //    return Results.Ok(new { user.UserName, user.Id });
+            //});
+
             app.MapGet("users/me", async (UserManager<ForumRestUser> userManager, HttpContext httpContext) =>
             {
-                var user = await userManager.GetUserAsync(httpContext.User);
+                // Get the username from HttpContext.User.Identity.Name
+                var userName = httpContext.User.Identity.Name;
+
+                // Find the user by username
+                var user = await userManager.FindByNameAsync(userName);
                 if (user == null)
                 {
-                    return Results.UnprocessableEntity("User not found");
+                    // Handle case where user is not found
+                    return Results.NotFound("User not found");
                 }
+
+                // Return user information
                 return Results.Ok(new { user.UserName, user.Id });
             });
+
 
             //register
             app.MapPost("api/register", async (UserManager<ForumRestUser> userManager, RegisterUserDto registerUserDto) =>
