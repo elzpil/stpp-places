@@ -89,7 +89,7 @@ namespace stpp.Auth
             //access token
             app.MapPost("api/accessToken", async (UserManager<ForumRestUser> userManager, JwtTokenService jwtTokenService, RefreshAccessTokenDto refreshAccessTokenDto) =>
             {
-                if(!jwtTokenService.TryParseREfreshToken(refreshAccessTokenDto.RefreshToken, out var claims))
+                if(!jwtTokenService.TryParseRefreshToken(refreshAccessTokenDto.RefreshToken, out var claims))
                 {
                     return Results.UnprocessableEntity();
                 }

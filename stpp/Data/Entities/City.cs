@@ -24,7 +24,7 @@ namespace stpp.Data.Entities
         public record CityCreateDto(int Id, string Name, string Description, double Latitude, double Longtitude, CountryDto Country);
         public record CreateCityDto(string Name, string Description, int CountryId); // Representing the associated country as a DTO);
 
-        public record UpdateCityDto(string Description);
+        public record UpdateCityDto(string Description, double Longtitude, double Latitude);
         public class CreateCityDtoValidator : AbstractValidator<CreateCityDto>
         {
             public CreateCityDtoValidator()
