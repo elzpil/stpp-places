@@ -15,7 +15,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("stpp")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+73909051d2040574fa7693fd2a90d7d0237c8183")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+aa7c196f6249ded0becead1e793de0f52fc68dac")]
 [assembly: System.Reflection.AssemblyProductAttribute("stpp")]
 [assembly: System.Reflection.AssemblyTitleAttribute("stpp")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

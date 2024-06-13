@@ -23,16 +23,6 @@ namespace stpp.Auth
 
             });
 
-            //app.MapGet("users/me", async (UserManager<ForumRestUser> userManager, HttpContext httpContext) =>
-            //{
-            //    var user = await userManager.GetUserAsync(httpContext.User);
-            //    if (user == null)
-            //    {
-            //        return Results.UnprocessableEntity("User not found");
-            //    }
-            //    return Results.Ok(new { user.UserName, user.Id });
-            //});
-
             app.MapGet("users/me", async (UserManager<ForumRestUser> userManager, HttpContext httpContext) =>
             {
                 // Get the username from HttpContext.User.Identity.Name
@@ -79,7 +69,7 @@ namespace stpp.Auth
             });
 
             //login
-            app.MapPost("api/login", async (UserManager<ForumRestUser> userManager,JwtTokenService jwtTokenService, LoginUserDto loginUserDto) =>
+            app.MapPost("api/login", async (UserManager<ForumRestUser> userManager, JwtTokenService jwtTokenService, LoginUserDto loginUserDto) =>
             {
                 // user exists
                 var user = await userManager.FindByNameAsync(loginUserDto.Username);
@@ -88,7 +78,7 @@ namespace stpp.Auth
                     return Results.UnprocessableEntity("username or password was incorrect");
 
                 }
-              
+
                 var isPasswordValid = await userManager.CheckPasswordAsync(user, loginUserDto.Password);
                 if (!isPasswordValid)
                     return Results.UnprocessableEntity("username or password was incorrect");
@@ -107,17 +97,17 @@ namespace stpp.Auth
             //access token
             app.MapPost("api/accessToken", async (UserManager<ForumRestUser> userManager, JwtTokenService jwtTokenService, RefreshAccessTokenDto refreshAccessTokenDto) =>
             {
-                if(!jwtTokenService.TryParseRefreshToken(refreshAccessTokenDto.RefreshToken, out var claims))
+                if (!jwtTokenService.TryParseRefreshToken(refreshAccessTokenDto.RefreshToken, out var claims))
                 {
                     return Results.UnprocessableEntity();
                 }
                 var userId = claims.FindFirstValue(JwtRegisteredClaimNames.Sub);
                 var user = await userManager.FindByIdAsync(userId);
-                if(user == null)
+                if (user == null)
                 {
                     return Results.UnprocessableEntity("Invalid token");
                 }
-                if(user.ForceRelogin)
+                if (user.ForceRelogin)
                 {
                     return Results.UnprocessableEntity();
                 }
@@ -133,9 +123,9 @@ namespace stpp.Auth
 
         }
     }
-    public record SuccessfulLoginDto (string AccessToken, string RefreshToken);
+    public record SuccessfulLoginDto(string AccessToken, string RefreshToken);
     public record UserDto(string UserId, string UserName, string Email);
-    public record RegisterUserDto (string Username, string Email, string Password);
+    public record RegisterUserDto(string Username, string Email, string Password);
     public record LoginUserDto(string Username, string Password);
     public record RefreshAccessTokenDto(string RefreshToken);
 }

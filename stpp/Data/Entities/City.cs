@@ -21,10 +21,10 @@ namespace stpp.Data.Entities
         public ForumRestUser User { get; set; }
 
         public record CityDto(int Id, string Name, string Description, CountryDto Country);
-        public record CityCreateDto(int Id, string Name, string Description, double Latitude, double Longtitude, CountryDto Country);
+        public record CityCreateDto(int Id, string Name, string Description, double Latitude, double longitude, CountryDto Country);
         public record CreateCityDto(string Name, string Description, int CountryId); // Representing the associated country as a DTO);
 
-        public record UpdateCityDto(string Description, double Longtitude, double Latitude);
+        public record UpdateCityDto(string Description, double Longitude, double Latitude);
         public class CreateCityDtoValidator : AbstractValidator<CreateCityDto>
         {
             public CreateCityDtoValidator()

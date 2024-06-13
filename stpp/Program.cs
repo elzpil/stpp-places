@@ -55,7 +55,7 @@ builder.Services.AddAuthentication(options =>
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
 }).AddJwtBearer(options =>
-{ 
+{
     options.TokenValidationParameters.ValidAudience = builder.Configuration["Jwt:ValidAudience"];
     options.TokenValidationParameters.ValidIssuer = builder.Configuration["Jwt:ValidIssuer"];
     options.TokenValidationParameters.IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Secret"]));
@@ -76,7 +76,7 @@ var countriesGroup = app.MapGroup("/api").WithValidationFilter();
 
 countriesGroup.MapGet("countries", async (ForumDbContext dbContext, CancellationToken cancellationToken) =>
 {
-    return (await dbContext.Countries.ToListAsync(cancellationToken)).Select( o => new CountryDto(o.Id,o.Name, o.Description));
+    return (await dbContext.Countries.ToListAsync(cancellationToken)).Select(o => new CountryDto(o.Id, o.Name, o.Description));
 });
 
 countriesGroup.MapGet("countries/{countryId}", async (int countryId, ForumDbContext dbContext) =>
@@ -107,7 +107,7 @@ countriesGroup.MapPut("countries/{countryId}", [Authorize(Roles = ForumRoles.Adm
     if (country == null)
         return Results.NotFound();
 
-    if(httpContext.User.FindFirstValue(JwtRegisteredClaimNames.Sub) != country.UserId && !httpContext.User.IsInRole(ForumRoles.Admin))
+    if (httpContext.User.FindFirstValue(JwtRegisteredClaimNames.Sub) != country.UserId && !httpContext.User.IsInRole(ForumRoles.Admin))
     {
         return Results.Forbid();
     }
@@ -130,7 +130,7 @@ countriesGroup.MapDelete("countries/{countryId}", [Authorize(Roles = ForumRoles.
         return Results.Forbid();
     }
 
-    dbContext.Remove(country); 
+    dbContext.Remove(country);
     await dbContext.SaveChangesAsync();
     return Results.NoContent();
 });
@@ -273,7 +273,7 @@ citiesGroup.MapPut("cities/{cityId}", [Authorize(Roles = ForumRoles.Admin + "," 
     }
 
     city.Description = dto.Description;
-    city.Longitude = dto.Longtitude;
+    city.Longitude = dto.Longitude;
     city.Latitude = dto.Latitude;
     dbContext.Update(city);
     await dbContext.SaveChangesAsync();
